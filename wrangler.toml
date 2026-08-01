@@ -1,0 +1,8 @@
+name = "ideal-society-generator"
+main = "worker.js"
+compatibility_date = "2026-08-01"
+workers_dev = true
+
+[vars]
+API_URL = "https://api.deepseek.com/chat/completions"
+DEEPSEEK_MODEL = "deepseek-v4-flash"
