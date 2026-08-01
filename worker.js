@@ -110,6 +110,12 @@ const HTML = `<!doctype html>
       overflow-wrap: anywhere;
       white-space: pre-wrap;
     }
+    mark {
+      background: #ffe9a8;
+      color: #171717;
+      padding: 0 2px;
+      border-radius: 3px;
+    }
     .note {
       margin: 24px 0 0;
       color: #999;
@@ -140,6 +146,33 @@ const HTML = `<!doctype html>
     const submitButton = document.getElementById('submit');
     const result = document.getElementById('result');
     let generating = false;
+
+    const HIGHLIGHT_KEYWORDS = ['共产党', '共产主义', '理想', '社会'];
+
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, (ch) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      })[ch]);
+    }
+
+    function highlightKeywords(text, topic) {
+      const keywords = [topic, ...HIGHLIGHT_KEYWORDS]
+        .map((kw) => kw.trim())
+        .filter((kw, index, arr) => kw && arr.indexOf(kw) === index)
+        .sort((a, b) => b.length - a.length);
+      if (!keywords.length) return escapeHtml(text);
+      const pattern = keywords
+        .map((kw) => kw.replace(/[.*+?^\${}()|[\\]\\\\]/g, '\\$&'))
+        .join('|');
+      return escapeHtml(text).replace(
+        new RegExp('(' + pattern + ')', 'g'),
+        '<mark>$1</mark>'
+      );
+    }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -176,7 +209,7 @@ const HTML = `<!doctype html>
             : '生成失败，请稍后再试。';
           throw new Error('generation_failed');
         }
-        result.textContent = data.meme;
+        result.innerHTML = highlightKeywords(data.meme, topic);
       } catch {
         result.textContent = failureMessage;
       } finally {
